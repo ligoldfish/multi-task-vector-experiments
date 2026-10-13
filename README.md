@@ -1,8 +1,6 @@
 # Multi-task vector experiments
 
-完整的 LTV / LoDA-MT 实验实现、独立向量分析工具、训练审查资料和续跑入口。对应 Qwen3-1.7B 冻结基座。仓库为私有仓库，受邀用户可以克隆或下载代码。
-
-这个仓库与实验产物分开存放：源码在 GitHub；真实已训练向量由 `task-vectors-only-*.zip` 或 `task-vector-portable-full-*.zip` 提供。仓库不会把合成测试张量冒充为真实训练结果。
+完整的 LTV / LoDA-MT 实验实现、独立向量分析工具、训练审查资料和续跑入口。对应 Qwen3-1.7B 冻结基座。
 
 ## 拿到代码后能做什么
 
@@ -121,9 +119,3 @@ NPU 将设备改为 `npu:0`。完整迁移使用包中原 Worker 源码，保持
 - [加速版已有 CPU 验证证据](accelerated/docs/validation/acceleration-evidence.json)
 
 已有验证报告有各自明确范围；CPU 测试通过不等于真实 NPU/CUDA 实验结果成立，也不证明加速吞吐。新增工具的发布验证见 `provenance/publication-validation.json`。
-
-加速版原部署入口采用新根重训，不能直接把旧 `training.json` 放进去宣称继承。现有跨机器继承入口以 baseline 科学实现为准；这里保留加速版供完整审查和独立部署，不混用两版缓存。
-
-## 许可与产物
-
-保留各第三方快照的原许可证与来源；本仓库没有替未明确授权的上游代码添加新许可证。真实 Qwen 权重、数据集、训练向量、缓存和虚拟环境不纳入 Git。源码中原先记录的路径/硬件信息用于审查，不代表本仓库在目标设备已经运行。
