@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-13",
+  "purpose": "CPU validation of source publication, artifact analysis and completed-vector portability",
+  "python": "3.11",
+  "torch": "2.8.0+cpu",
+  "tests": [
+    {"suite": "tests/test_analyze_vectors.py", "passed": 14},
+    {"suite": "tests/test_attach_vectors.py", "passed": 11},
+    {"suite": "portable/test_portable_export.py", "passed": 9},
+    {"suite": "portable/test_use_task_vector.py", "passed": 7}
+  ],
+  "total_passed": 41,
+  "failed": 0,
+  "combined_new_tools_run_seconds": 26.446,
+  "portable_tools_run_seconds": 33.827,
+  "local_test_environment_note": "Existing Windows Conda environment required process-local KMP_DUPLICATE_LIB_OK=TRUE for duplicate OpenMP runtime DLLs. The workaround is not set by production tools or Linux CI.",
+  "checks": [
+    "Frozen baseline and accelerated source manifests match their local originals",
+    "Plain PT CPU loading and original LTV/LoDA intervention equivalence",
+    "Latest exporter-created ZIP consumed by completed-vector attach and PortableRunner",
+    "Eight imported completed vectors reused without loading a model or retraining",
+    "Wrong data, base, source, tensor, indexed scope or LTV layers rejected",
+    "LoDA actual sum(BA) geometry, mean and SVD q0/q1/q2 with shared/residual exports"
+  ],
+  "evidence_boundary": {
+    "fixtures": "tiny synthetic CPU fixtures only; no real trained tensors included in Git",
+    "real_npu_or_cuda_run_performed_for_this_publication": false,
+    "throughput_or_scientific_results_claimed": false,
+    "optimizer_checkpoint_resume_claimed": false,
+    "original_worker_full_ops_and_local_configuration_verified_from_vector_only": false,
+    "target_base_and_original_prepared_data_required_for_continuation": true
+  }
+}

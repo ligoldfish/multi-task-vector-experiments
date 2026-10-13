@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "reason": "Portable CPU checkpoint serialization; exact engineering calibration reuse",
+  "scientific_changes": [],
+  "source_only_install": true,
+  "files": [
+    {
+      "path": "src/task_vector/io.py",
+      "before_sha256": "ff8faba597aa064f30125f8e527dad435f8dba947b5562f818ed997c03e137df",
+      "sha256": "9485cea77a36f1b4882986bbad62b89e42126d139c397951a661e8e9e85fc96d"
+    },
+    {
+      "path": "ops/recover_portable_checkpoint.py",
+      "before_sha256": null,
+      "sha256": "7c514319ae7e7f1118253684bbf0878dd32f7e27be2d08f7fd22c219cfd160c8"
+    },
+    {
+      "path": "tests/test_portable_checkpoint.py",
+      "before_sha256": null,
+      "sha256": "d5ef1bd3d95dac537bd654e8a4796d4ccdb15bb4d07d7351cb08c3ad7da380af"
+    },
+    {
+      "path": "tests/test_portable_recovery.py",
+      "before_sha256": null,
+      "sha256": "4552a20af165f187b032850f25970a8a10f40f5afc436fcc3aa2eb07fff3b77a"
+    },
+    {
+      "path": "docs/工程检查点兼容修订-20261012.md",
+      "before_sha256": null,
+      "sha256": "65b4ddf7a4e2c0578464314435954c08636c5007dee24d609e428489976b02af"
+    }
+  ]
+}

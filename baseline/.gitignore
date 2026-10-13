@@ -1,0 +1,14 @@
+.venv*/
+.pytest_tmp*/
+.pytest-*/
+.platform_inventory_smoke/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+data/
+outputs/
+dist/
+build/
+*.log
+

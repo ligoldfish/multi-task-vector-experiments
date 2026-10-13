@@ -1,0 +1,47 @@
+{
+  "model_path": "/opt/dpcvol/datasets/REPLACE_WITH_REAL_QWEN3_1_7B_SNAPSHOT_DIRECTORY",
+  "semantic_model_path": "/opt/dpcvol/datasets/REPLACE_WITH_REAL_ALL_MINILM_L6_V2_DIRECTORY",
+  "persistent_root": "/opt/dpcvol/datasets/REPLACE_WITH_NEW_EXISTING_EXPERIMENT_ROOT",
+  "runtime_python": "/opt/dpcvol/datasets/REPLACE_WITH_PERSISTENT_VENV/bin/python",
+  "cann_env": null,
+  "expected_devices": 8,
+  "data_sources": {
+    "math": {
+      "path": "/opt/dpcvol/datasets/REPLACE_WITH_OFFICIAL_GSM8K_SOURCE",
+      "train_split": "train",
+      "eval_split": "test"
+    },
+    "logic": {
+      "path": "/opt/dpcvol/datasets/REPLACE_WITH_OFFICIAL_PROOFWRITER_OWA_DEPTH_0_TO_3_SOURCE",
+      "world": "OWA",
+      "max_depth": 3,
+      "train_split": "train",
+      "eval_split": "test"
+    },
+    "translation": {
+      "path": "/opt/dpcvol/datasets/REPLACE_WITH_OFFICIAL_IWSLT2017_EN_DE_SOURCE",
+      "train_split": "train",
+      "eval_split": "test"
+    },
+    "paraphrase": {
+      "path": "/opt/dpcvol/datasets/REPLACE_WITH_OFFICIAL_QQP_SOURCE",
+      "train_split": "train",
+      "eval_split": "validation"
+    },
+    "code_generation": {
+      "path": "/opt/dpcvol/datasets/REPLACE_WITH_OFFICIAL_COMPLETE_MBPP_SOURCE",
+      "train_split": "train",
+      "eval_split": "test"
+    },
+    "code_repair": {
+      "path": "/opt/dpcvol/datasets/REPLACE_WITH_OFFICIAL_COMPLETE_MBPP_SOURCE",
+      "train_split": "train",
+      "eval_split": "test"
+    },
+    "summary": {
+      "path": "/opt/dpcvol/datasets/REPLACE_WITH_OFFICIAL_SAMSUM_SOURCE_WITH_TRAIN_AND_TEST",
+      "train_split": "train",
+      "eval_split": "test"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "validated_utc": "2026-10-10T13:05:04.109492+00:00",
+  "requirements": 68,
+  "inferences": 10,
+  "approved_supplements": 5,
+  "findings": 16,
+  "local_file_links_validated": 463,
+  "csv_json_equivalent": true,
+  "source_payload_files_unchanged": 82,
+  "original_document_matches": true,
+  "scientific_tests_rerun": false,
+  "model_data_npu_run": false,
+  "main_report_sha256": "ea53b79cebae968d61734b8f62498d9371af7b4b5660e435985c79009e31f864"
+}

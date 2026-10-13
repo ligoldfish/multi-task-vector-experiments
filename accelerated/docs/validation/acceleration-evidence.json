@@ -1,0 +1,26 @@
+{
+  "unique_tests": 355,
+  "passed": 354,
+  "skipped": 1,
+  "failed": 0,
+  "unchanged_critical_sources_and_protocols": {
+    "src/task_vector/data.py": "e3a0ca3d2f825f69087ea002121dff2f1a812cdcf5f72c2da5a95ae5dd25cd9b",
+    "src/task_vector/prompts.py": "1a1d6b55e73b6cdfe1647a27a0b66d4afb0e4d6adde685d17e8e13a2dafd890f",
+    "src/task_vector/training.py": "1c78524ccabc94c52afee91f0858b245b498b108c128ddfdf12c8c7f38bc96ed",
+    "src/task_vector/ltv.py": "ebbedf1b2c8a26794ff1da2b452eaad4fe6f2e29568bcf9aee9002beb8dc66d7",
+    "src/task_vector/loda.py": "097e7e3f8b3ec77c599bb40885b91d33085152057c72188818ecaa40962ed5df",
+    "src/task_vector/gao.py": "ef9af70faf1e08b4d0df6ba9396e051721bad831b2613e2ec46bb7c009fbdb29",
+    "src/task_vector/subspaces.py": "d0b81dce5c893799517f31d095eb0f6970b9e47fdd0820e464d7fd5e9c0d8ea2",
+    "src/task_vector/representations.py": "624d84fec2eb33d07f9f63593e67c5a8de2009db18d7b70848aba79750ee8e9e",
+    "src/task_vector/losses.py": "61b1c64f67ef9f7c7b4baafc12680bcbf0da2ee2ba7b41469039f328adc4ed2b",
+    "src/task_vector/baselines.py": "145eb7daf8817a34127e4c605302546135a6d17be2bbbad2becc6ceb13c581c0",
+    "src/task_vector/joint.py": "aec4d510ed604914562d52cd49ef753d346ddc8e03754c186a7f4b79b59e2038",
+    "src/task_vector/sequential.py": "f8df1b3e3e5729708be77d5a96b46f4c8712b9b3985025db6631f1f67080e231",
+    "src/task_vector/modeling.py": "5ce57b8cac4a9b0efaa60bf704b80ac1459d0121b0e1a93ad96963b3304324d6",
+    "src/task_vector/code_execution.py": "cbf87fd8787954c05bc19126074f92d03ae4ab1fe0cc4e92a7ce9792db3c62dc",
+    "src/task_vector/io.py": "9485cea77a36f1b4882986bbad62b89e42126d139c397951a661e8e9e85fc96d",
+    "docs/原始实验方案.md": "d689bc2cb01a9dfe88b0f42ce2b385ac43ac0a2633dea53e582882e3ccfd2a5c",
+    "docs/补充协议与实现选择.md": "cc07f99b08c0c01fbdeaca215c9d764bd644dc000413a988ed7799c4b364db84"
+  },
+  "validation_scope": "CPU only; no Ascend runtime throughput claim"
+}

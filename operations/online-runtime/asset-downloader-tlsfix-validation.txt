@@ -1,0 +1,52 @@
+DOWNLOAD asset.bin attempt=1 resume=0 source=http://127.0.0.1:2810/corrupt
+PRESERVED_INVALID=C:\Users\hujin\.codex\visualizations\2026\10\10\01a1246d-d740-7b00-9bbb-fb8379c1ee94\modelmate-repaired\online-runtime\verification-fixtures-20261011T090828.285895Z\corruption\asset.bin.partial.invalid-20261011T090829.888158Z
+DOWNLOAD_RETRY asset.bin: ValueError: SHA256 mismatch: C:\Users\hujin\.codex\visualizations\2026\10\10\01a1246d-d740-7b00-9bbb-fb8379c1ee94\modelmate-repaired\online-runtime\verification-fixtures-20261011T090828.285895Z\corruption\asset.bin.partial: b5916b2078ec61e2b9cc4fa49bd25d73705755652a1d175609e892adb715e5aa != 134e4c05b84dca623b042134e8b00f0bc61d3cb093ae2e62bdf17461de86606a
+DOWNLOAD asset.bin attempt=2 resume=0 source=http://127.0.0.1:2810/corrupt
+PRESERVED_INVALID=C:\Users\hujin\.codex\visualizations\2026\10\10\01a1246d-d740-7b00-9bbb-fb8379c1ee94\modelmate-repaired\online-runtime\verification-fixtures-20261011T090828.285895Z\corruption\asset.bin.partial.invalid-20261011T090829.917962Z
+DOWNLOAD_RETRY asset.bin: ValueError: SHA256 mismatch: C:\Users\hujin\.codex\visualizations\2026\10\10\01a1246d-d740-7b00-9bbb-fb8379c1ee94\modelmate-repaired\online-runtime\verification-fixtures-20261011T090828.285895Z\corruption\asset.bin.partial: b5916b2078ec61e2b9cc4fa49bd25d73705755652a1d175609e892adb715e5aa != 134e4c05b84dca623b042134e8b00f0bc61d3cb093ae2e62bdf17461de86606a
+DOWNLOAD asset.bin attempt=3 resume=0 source=http://127.0.0.1:2810/corrupt
+PRESERVED_INVALID=C:\Users\hujin\.codex\visualizations\2026\10\10\01a1246d-d740-7b00-9bbb-fb8379c1ee94\modelmate-repaired\online-runtime\verification-fixtures-20261011T090828.285895Z\corruption\asset.bin.partial.invalid-20261011T090829.954855Z
+DOWNLOAD_RETRY asset.bin: ValueError: SHA256 mismatch: C:\Users\hujin\.codex\visualizations\2026\10\10\01a1246d-d740-7b00-9bbb-fb8379c1ee94\modelmate-repaired\online-runtime\verification-fixtures-20261011T090828.285895Z\corruption\asset.bin.partial: b5916b2078ec61e2b9cc4fa49bd25d73705755652a1d175609e892adb715e5aa != 134e4c05b84dca623b042134e8b00f0bc61d3cb093ae2e62bdf17461de86606a
+DOWNLOAD asset.bin attempt=1 resume=0 source=http://127.0.0.1:2810/ok
+DOWNLOAD_OK=asset.bin
+test_checksum_failure_preserved_then_fallback (__main__.Checks.test_checksum_failure_preserved_then_fallback) ... ok
+SOURCE_TLS_PASS=local-fixture HTTP=206 transport=curl
+test_curl_probe_reads_real_route_and_reports_transport (__main__.Checks.test_curl_probe_reads_real_route_and_reports_transport) ... ok
+test_exact_proofwriter_members_and_unknown_retained (__main__.Checks.test_exact_proofwriter_members_and_unknown_retained) ... ok
+test_existing_ca_bundle_repairs_empty_platform_ca_store (__main__.Checks.test_existing_ca_bundle_repairs_empty_platform_ca_store) ... ok
+TLS_CA={"openssl": "OpenSSL 3.0.18 30 Sep 2025", "default_verify_paths": {"cafile": "D:\\Anaconda3\\Library\\ssl\\cacert.pem", "capath": null, "openssl_cafile_env": "SSL_CERT_FILE", "openssl_cafile": "C:\\Program Files\\Common Files\\ssl/cert.pem", "openssl_capath_env": "SSL_CERT_DIR", "openssl_capath": "C:\\Program Files\\Common Files\\ssl/certs"}, "default_store": {"x509": 0, "crl": 0, "x509_ca": 0}, "bundles": [{"source": "SSL_CERT_FILE", "path": "D:\\anaconda3\\Library\\ssl\\cacert.pem", "sha256": "f290e6acaf904a4121424ca3ebdd70652780707e28e8af999221786b86bb1975"}, {"source": "certifi", "path": "D:\\anaconda3\\Lib\\site-packages\\certifi\\cacert.pem", "sha256": "2089fc5a25836401faee99f722460b01b393999746a0fb817943666d6ecc0458"}, {"source": "pip._vendor.certifi", "path": "D:\\anaconda3\\Lib\\site-packages\\pip\\_vendor\\certifi\\cacert.pem", "sha256": "794d039ffdf277c047e26f2c7d58f81a5865d8a0eb7024a0fac1164fea4d27cf"}], "unavailable": [], "effective_store": {"x509": 161, "crl": 0, "x509_ca": 161}, "hostname_verification": true, "proxy_schemes_present": ["ftp", "http", "https"]}
+test_existing_corrupt_asset_is_never_replaced (__main__.Checks.test_existing_corrupt_asset_is_never_replaced) ... ok
+DOWNLOAD asset.bin attempt=1 resume=0 source=http://127.0.0.1:2810/ok
+DOWNLOAD_OK=asset.bin
+VERIFIED_EXISTING=asset.bin
+test_fresh_download_and_reuse (__main__.Checks.test_fresh_download_and_reuse) ... ok
+DOWNLOAD_RETRY asset.bin: HTTPError: HTTP Error 503: Service Unavailable
+DOWNLOAD_RETRY asset.bin: HTTPError: HTTP Error 503: Service Unavailable
+DOWNLOAD_RETRY asset.bin: HTTPError: HTTP Error 503: Service Unavailable
+DOWNLOAD asset.bin attempt=1 resume=0 source=http://127.0.0.1:2810/ok
+DOWNLOAD_OK=asset.bin
+test_mirror_failure_uses_second_pinned_source (__main__.Checks.test_mirror_failure_uses_second_pinned_source) ... ok
+test_model_mirror_probe_accepts_verified_fallback (__main__.Checks.test_model_mirror_probe_accepts_verified_fallback) ... ok
+SOURCE_TLS_FAIL={"source": "hf-mirror", "error": "RuntimeError: [{\"url\": \"https://hf-mirror.com/datasets/openai/gsm8k/resolve/740312add88f781978c0658806c59bc2815b9866/main/test-00000-of-00001.parquet\", \"error\": \"URLError: <urlopen error ('fixture missing issuer',)>\"}]"}
+SOURCE_TLS_FAIL={"source": "proofwriter", "error": "RuntimeError: [{\"url\": \"https://aristo-data-public.s3.amazonaws.com/proofwriter/proofwriter-dataset-V2020.12.3.zip\", \"error\": \"URLError: <urlopen error ('fixture missing issuer',)>\"}]"}
+SOURCE_TLS_FAIL={"source": "model_mirror", "error": "RuntimeError: [{\"url\": \"https://modelscope.cn/models/Qwen/Qwen3-1.7B/resolve/4855588ea1a12789f2e965e5f52a9e4a24c94b2a/model-00001-of-00002.safetensors\", \"error\": \"URLError: <urlopen error ('fixture missing issuer',)>\"}, {\"url\": \"https://hf-mirror.com/Qwen/Qwen3-1.7B/resolve/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/model-00001-of-00002.safetensors\", \"error\": \"URLError: <urlopen error ('fixture missing issuer',)>\"}]"}
+SOURCE_TLS_FAIL={"source": "samsum", "error": "RuntimeError: [{\"url\": \"https://arxiv.org/src/1911.12237v2/anc/corpus.7z\", \"error\": \"URLError: <urlopen error ('fixture missing issuer',)>\"}]"}
+test_network_probe_failure_is_bounded_before_asset_downloads (__main__.Checks.test_network_probe_failure_is_bounded_before_asset_downloads) ... ok
+test_path_boundaries (__main__.Checks.test_path_boundaries) ... ok
+DOWNLOAD asset.bin attempt=1 resume=123 source=http://127.0.0.1:2810/ok
+DOWNLOAD_OK=asset.bin
+test_resume_206 (__main__.Checks.test_resume_206) ... ok
+test_samsum_empty_dialogue_preserved_and_reuse_hashes_checked (__main__.Checks.test_samsum_empty_dialogue_preserved_and_reuse_hashes_checked) ... ok
+DOWNLOAD asset.bin attempt=1 resume=0 source=http://127.0.0.1:2810/ignore
+DOWNLOAD_OK=asset.bin
+test_server_ignores_range_200 (__main__.Checks.test_server_ignores_range_200) ... ok
+DOWNLOAD asset.bin attempt=1 resume=123 transport=curl source=http://127.0.0.1:2810/ok
+DOWNLOAD_OK=asset.bin
+test_system_curl_fallback_preserves_resume_and_checksum (__main__.Checks.test_system_curl_fallback_preserves_resume_and_checksum) ... ok
+SOURCE_TLS_PASS=trusted-fixture HTTP=206
+test_tls_verification_and_redirect_context (__main__.Checks.test_tls_verification_and_redirect_context) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 11.333s
+
+OK

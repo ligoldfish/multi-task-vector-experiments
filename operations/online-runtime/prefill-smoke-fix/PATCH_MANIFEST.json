@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "smoke_protocol": "same_shape_causal_prefill_v2",
+  "reason": "Same-shape causal checks separate BF16 shape drift from intervention correctness",
+  "scientific_changes": [],
+  "files": [
+    {
+      "path": "src/task_vector/smoke.py",
+      "before_sha256": "110b9a364160490c81f73ad7b9cb260c1b5f786e942831f94a902fd5fe796627",
+      "sha256": "fafdb61c6db47f7e0d1e0fcb908e4eee616a5c7b2a1f73629dfc2d937653c020"
+    },
+    {
+      "path": "ops/recover_prefill_smoke.py",
+      "before_sha256": null,
+      "sha256": "9686ed49a2fb40ef51b4515ae5895317dcc87428fdeb4a494a594935573ac71a"
+    },
+    {
+      "path": "tests/test_smoke_prefill.py",
+      "before_sha256": null,
+      "sha256": "c8fd50b14099e897b27a3f719b6fb99e1ebdeb2d716a0e2aef019f82b73042b4"
+    },
+    {
+      "path": "tests/test_smoke_recovery.py",
+      "before_sha256": null,
+      "sha256": "014b2b8c7d57dfa7c8ec52aff5680bbed630d5098cb23b9750c0662cd380d03a"
+    },
+    {
+      "path": "docs/工程冒烟数值比较修订-20261011.md",
+      "before_sha256": null,
+      "sha256": "94c5a78bf9cbaa68cb63f0ec5cc7213da6bd59e36eab2b7ee1743de285ec76f1"
+    }
+  ]
+}

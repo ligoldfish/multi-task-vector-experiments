@@ -1,0 +1,117 @@
+schema_version: 1
+project: multi_task_vector
+platform:
+  device: npu:0
+  persistent_root: /opt/dpcvol/datasets/task-vector
+  assets_root: /opt/dpcvol/datasets
+  expected_devices: 8
+  reported_hardware: 'ASCEND_910B | 176U | 880G; user reports eight cards total 64G; verify at runtime'
+  reported_versions: {CANN: 8.5.0-a3, torch: 2.8.0, torch_npu: 2.8.0, vllm_ascend: 0.13.0, verl: 0.7.1}
+model:
+  id: Qwen/Qwen3-1.7B
+  path: null
+  revision: null
+  dtype: bfloat16
+  enable_thinking: false
+  attention_implementation: eager
+  expected_config: {num_hidden_layers: 28, hidden_size: 2048, num_attention_heads: 16, num_key_value_heads: 8, head_dim: 128}
+data:
+  tasks: [math, logic, translation, paraphrase]
+  extension_tasks: [code_generation, code_repair]
+  auxiliary_tasks: [summary]
+  split_seed: 17
+  counts: {train: 512, tune: 128, discovery: 128, test: 256}
+  counts_by_task:
+    code_generation: {train: 300, tune: 37, discovery: 37, test: 256}
+    code_repair: {train: 300, tune: 37, discovery: 37, test: 256}
+  formal_test_size: 1000
+  proofwriter_world: OWA
+  proofwriter_max_depth: 3
+  sources:
+    math: {dataset_id: openai/gsm8k, config: main, train_split: train, eval_split: test, allow_remote: false, path: null}
+    logic: {path: null, allow_remote: false}
+    translation: {dataset_id: IWSLT/iwslt2017, config: iwslt2017-en-de, train_split: train, eval_split: test, allow_remote: false, path: null}
+    paraphrase: {dataset_id: nyu-mll/glue, config: qqp, train_split: train, eval_split: validation, allow_remote: false, path: null}
+    code_generation: {dataset_id: google-research-datasets/mbpp, config: full, train_split: train, eval_split: test, allow_remote: false, path: null}
+    code_repair: {dataset_id: google-research-datasets/mbpp, config: full, train_split: train, eval_split: test, allow_remote: false, path: null}
+    summary: {dataset_id: Samsung/samsum, train_split: train, eval_split: test, allow_remote: false, path: null}
+training:
+  learning_rate: 0.001
+  epochs: 5
+  micro_batch_size: 2
+  effective_batch_size: 16
+  gradient_accumulation_steps: 8
+  weight_decay_ltv: 0.01
+  weight_decay_loda: 0.0
+  warmup_steps: 0
+  max_grad_norm: 1.0
+  patience: 2
+  max_prompt_tokens: 512
+  max_target_tokens: 512
+  gradient_checkpointing: true
+  betas: [0.9, 0.999]
+  adam_epsilon: 0.00000001
+  resume_from: null
+ltv: {layers: [14], init_low: -0.1, init_high: 0.1}
+loda:
+  rank_general: 8
+  rank_isolated: 8
+  a_scale: 0.5773502691896258
+  rho_max: 0.05
+  recalibration_lambda: 3.0
+  epsilon: 0.000000000001
+  regularization: 0.0001
+  statistics_samples: 128
+  max_statistics_tokens: 64
+  statistics_seed: 17
+  master_dtype: float32
+  primary_version: post
+evaluation:
+  generation_batch_size: 1
+  do_sample: false
+  use_cache: true
+  max_prompt_tokens: {joint: 1536}
+  max_new_tokens: {math: 512, logic: 32, translation: 256, paraphrase: 128, code_generation: 512, code_repair: 512, summary: 256, joint: 1536}
+  intervention_scale: 1.0
+  bootstrap_samples: 2000
+  confidence_level: 0.95
+  random_repeats: 1
+  variants: [canonical, output_format, prompt_paraphrase, label_recode]
+metrics:
+  ibleu_alpha: 0.9
+  semantic_model: sentence-transformers/all-MiniLM-L6-v2
+  semantic_model_path: null
+  joint_threshold_policy: tune_base_median
+code_execution:
+  backend: subprocess
+  timeout_seconds: 3
+  memory_limit_mb: 512
+  docker_image: python:3.11-slim
+  mutation_seed: 17
+analysis:
+  seeds: [17, 29, 43]
+  ranks: [0, 1, 2]
+  methods: [mean, svd]
+  strength_grid: [0.0, 0.5, 1.0, 1.5, 2.0]
+  pair_weight_grid: [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [0.5, 1.0], [1.0, 0.5]]
+  norm_reference: mean
+  cluster_bootstrap_samples: 500
+  cluster_min_stability: 0.8
+  cluster_max_groups: 3
+  gate_min_positive_tasks: all
+  gate_requires_all_seeds: true
+  transfer_sign_tolerance: 0.000000000001
+  transfer_min_sign_agreement: 0.8
+  transfer_min_spearman: 0.5
+  sequential_orders:
+    - [math, logic, translation, paraphrase]
+    - [logic, translation, paraphrase, math]
+    - [translation, paraphrase, math, logic]
+    - [paraphrase, math, logic, translation]
+  ltv_layer_ablations: [[6], [22], [6, 14, 22]]
+  baselines: [ties, tsv, knots]
+  ties_density: 0.2
+  tsv_variant: author_matrix_dimension_budget_orthogonalization
+  heldout_tasks: [math, logic, translation, paraphrase]
+  joint_count: 128
+  gate_policy: stop_dependent_scientific_stages

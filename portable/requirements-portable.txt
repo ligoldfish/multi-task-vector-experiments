@@ -1,0 +1,11 @@
+# Prepare the correct torch 2.8 build for the target hardware separately.
+# This installs only experiment dependencies, without building inside frozen code/.
+numpy==1.26.4
+scipy>=1.10,<2
+PyYAML>=6,<7
+transformers==4.51.3
+datasets==3.6.0
+sacrebleu==2.5.1
+rouge-score==0.1.2
+sentence-transformers==3.4.1
+filelock>=3.12,<4
