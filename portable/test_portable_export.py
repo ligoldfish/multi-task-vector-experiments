@@ -16,7 +16,7 @@ import export_portable as ex
 import portable_import as imp
 import portable_run as run
 
-ORIGINAL = Path(__file__).resolve().parents[1] / "baseline"
+ORIGINAL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ORIGINAL / "src"))
 from task_vector.representations import Representation, LowRankFactor
 from task_vector.runner import ExperimentRunner
@@ -32,7 +32,7 @@ class PortableIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Keep test artifacts; no deletion of user files/environments.
-        cls.work = Path(tempfile.mkdtemp(prefix="portable-handoff-test-", dir=Path(__file__).parent))
+        cls.work = Path(tempfile.mkdtemp(prefix="portable-handoff-test-"))
         cls.code, cls.root, cls.base, cls.semantic = (cls.work / name for name in ("source", "old-experiment", "base", "semantic"))
         for path in (cls.code, cls.root, cls.base, cls.semantic):
             path.mkdir()
@@ -48,6 +48,7 @@ class PortableIntegration(unittest.TestCase):
         (cls.semantic / "model.safetensors").write_bytes(b"synthetic-not-a-real-semantic-model")
         config = yaml.safe_load((cls.code / "configs/experiment.yaml").read_text(encoding="utf-8"))
         config["platform"].update(device="cpu", persistent_root=str(cls.root))
+        config["acceleration"]["enabled"] = False
         config["model"]["path"] = str(cls.base)
         config["metrics"]["semantic_model_path"] = str(cls.semantic)
         config["runtime"] = {"data_root": str(cls.root / "data"), "output_root": str(cls.root / "runs")}

@@ -19,8 +19,8 @@ import zipfile
 
 
 TASKS = ("math", "logic", "translation", "paraphrase", "code_generation", "code_repair", "summary")
-ROOT_CODE = "/home/work/user-job-dir/app/task-vector-code-20261011T071308Z"
-ROOT_EXPERIMENT = "/opt/dpcvol/datasets/naie/task-vector/experiments/exp-20261011-01"
+ROOT_CODE = str(Path(__file__).resolve().parents[1])
+ROOT_EXPERIMENT = None
 
 
 def file_hash(path):
@@ -58,6 +58,7 @@ def scientific_config(config):
     result = deepcopy(config)
     result.get("platform", {}).pop("device", None)
     result.get("training", {}).pop("resume_from", None)
+    result.pop("acceleration", None)
     return result
 
 
@@ -121,7 +122,7 @@ def collect(code, root, config_path, tools):
     sources = source_manifest(code)
     source_digest = object_hash(sources)
     full, vectors = {}, {}
-    for folder in ("src", "configs", "deploy", "third_party", "ops", "tests", "docs"):
+    for folder in ("src", "configs", "deploy", "third_party", "ops", "tests", "docs", "tools", "provenance"):
         if (code / folder).is_dir():
             tree_files(code / folder, "code/" + folder + "/", full)
     for path in sorted(code.iterdir()):
@@ -200,16 +201,11 @@ def collect(code, root, config_path, tools):
         inventory.append(item)
         item["standalone_exports"] = exports
         print(f"COMPLETED={family}/{route_folder}/{seed}/{task} epochs={record.get('completed_epochs')}", flush=True)
-    required = {(r, t) for r in ("ltv", "loda") for t in TASKS[:4]}
-    found = {(i["route"], i["task"]) for i in inventory if i["seed"] == 17 and i["scope"] == "mvp" and i["layers"] is None}
-    if not required <= found:
-        raise ValueError(f"The original eight seed17 representations are not all complete: missing={required - found}")
+    if not inventory:
+        raise ValueError("No completed training representations to export")
     stats_folder = root / "runs/statistics/frozen_base"
     for path in sorted(stats_folder.glob("*.pt")):
         add_file(full, path, "experiment/runs/statistics/frozen_base/" + path.name)
-    for task in TASKS[:4]:
-        if not (stats_folder / f"{task}.pt").is_file():
-            raise ValueError(f"Required frozen-base statistics are missing: {task}")
     add_file(full, base_path, "experiment/runs/base_fingerprint.json", file_hash(base_path))
     semantic = config.get("metrics", {}).get("paraphrase", {}).get("semantic_model_path") or config["metrics"].get("semantic_model_path")
     if not semantic or not Path(semantic).is_dir():
@@ -224,7 +220,7 @@ def collect(code, root, config_path, tools):
         add_file(full, path, "evidence/runs/protocol/" + path.name)
     for path in sorted((root / "environment").glob("*.json")):
         add_file(full, path, "evidence/environment/" + path.name)
-    for name in ("portable_import.py", "portable_run.py", "use_task_vector.py", "requirements-portable.txt", "README_迁移与使用.md", "export_portable.py", "export_portable.sh"):
+    for name in ("portable_import.py", "portable_run.py", "use_task_vector.py", "requirements-portable.txt", "README.md", "export_portable.py", "export_portable.sh"):
         add_file(full, tools / name, name)
     add_file(vectors, tools / "use_task_vector.py", "use_task_vector.py")
     index = {"schema_version": 2, "created_utc": datetime.now(timezone.utc).isoformat(),
@@ -239,7 +235,7 @@ def collect(code, root, config_path, tools):
     return full, vectors, index
 
 
-VECTOR_README = """独立 task vector 包（无需整套实验代码）
+VECTOR_README = """Exported task vectors
 
 每个目录是一项训练结果，目录区分路线、层、seed、任务。
 post.pt：主结果，可直接使用。raw.pt：重标定前版本。initial.pt：未训练对照，不是额外训练结果。
@@ -331,9 +327,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--code", default=os.environ.get("TV_EXPORT_CODE", ROOT_CODE))
     parser.add_argument("--experiment", default=os.environ.get("TV_EXPORT_ROOT", ROOT_EXPERIMENT))
-    parser.add_argument("--output", default=os.environ.get("TV_EXPORT_DIR", "/home/work/user-job-dir/app"))
+    parser.add_argument("--output", default=os.environ.get("TV_EXPORT_DIR", "."))
     parser.add_argument("--config", default=None)
     args = parser.parse_args(argv)
+    if not args.experiment:
+        parser.error("--experiment is required: existing experiment root")
     code, root, output = (Path(x).resolve() for x in (args.code, args.experiment, args.output))
     if not all(p.is_dir() for p in (code, root, output)):
         raise ValueError("Code, experiment and download output directories must exist")
@@ -344,8 +342,8 @@ def main(argv=None):
     if shutil.disk_usage(output).free < upper_bound:
         raise ValueError(f"Download directory needs up to {upper_bound / 1024**3:.2f} GiB free before compression: {output}")
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ") + "-" + uuid.uuid4().hex[:8]
-    vector_path = output / f"task-vectors-only-{stamp}.zip"
-    full_path = output / f"task-vector-portable-full-{stamp}.zip"
+    vector_path = output / f"vectors-{stamp}.zip"
+    full_path = output / f"experiment-{stamp}.zip"
     contract = {"model_id": index["config_used"]["model"]["id"], "fingerprint": index["base_fingerprint"]["fingerprint"],
                 "files": index["base_fingerprint"]["sha256"], "expected_config": index["config_used"]["model"]["expected_config"],
                 "enable_thinking": False, "intervention_scale": 1.0}

@@ -1,7 +1,7 @@
 """Audit a vectors-only export and reproduce within-route geometric analysis on CPU.
 
 No model, accelerator, original DPC path, or unsafe pickle fallback is needed.
-Geometry imports the repository's frozen baseline implementation and works with
+Geometry imports the project's geometric analysis implementation and works with
 the represented sum(B @ A), never with flattened low-rank factor coordinates.
 """
 from __future__ import annotations
@@ -210,15 +210,15 @@ def inspect_payload(payload):
             "representation_digest": payload_digest(payload), "factor_flattening": False}
 
 
-def baseline_source_check(source_root, origin):
+def training_source_check(source_root, origin):
     package = source_root / "src/task_vector"
     if not package.is_dir():
-        return {"status": "NOT_CHECKED", "reason": "Baseline source directory is unavailable"}
+        return {"status": "NOT_CHECKED", "reason": "Project source directory is unavailable"}
     digest = object_hash({path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                           for path in sorted(package.glob("*.py"))})
     expected = origin.get("provenance", {}).get("training_sources_sha256")
     return {"status": "MATCH" if expected == digest else "DIFFERENT" if expected else "UNAVAILABLE_IN_ORIGIN",
-            "baseline_training_sources_sha256": digest, "origin_training_sources_sha256": expected,
+            "project_training_sources_sha256": digest, "origin_training_sources_sha256": expected,
             "scope": "All Python files in src/task_vector; not the original path-dependent full source/config manifest"}
 
 
@@ -300,7 +300,7 @@ def write_json(path, value):
 def geometry_functions(source_root):
     package = source_root / "src/task_vector"
     if not (package / "analysis.py").is_file():
-        raise ValueError(f"Baseline geometry source is unavailable: {package}")
+        raise ValueError(f"Project geometry source is unavailable: {package}")
     sys.path.insert(0, str(source_root / "src"))
     representation = importlib.import_module("task_vector.representations")
     analysis = importlib.import_module("task_vector.analysis")
@@ -314,7 +314,7 @@ def analyze(bundle_path, output, *, source_root=None, version="post", geometry=T
         raise ValueError("Version must be post, raw, or initial")
     if save_decomposition and not geometry:
         raise ValueError("--save-decomposition requires geometry")
-    source_root = Path(source_root or Path(__file__).resolve().parents[1] / "baseline").resolve()
+    source_root = Path(source_root or Path(__file__).resolve().parents[1]).resolve()
     output = Path(output).resolve()
     if output.exists():
         raise ValueError(f"Output must be a new directory: {output}")
@@ -353,7 +353,7 @@ def analyze(bundle_path, output, *, source_root=None, version="post", geometry=T
                       "task": item["task"], "seed": item["seed"], "selected_version": version,
                       "is_untrained_control": version == "initial", "inspection": inspection,
                       "representation_metadata": payload["metadata"], "training_origin": origin,
-                      "training_source_comparison": baseline_source_check(source_root, origin),
+                      "training_source_comparison": training_source_check(source_root, origin),
                       "provenance_consistency": "PASS", "geometry_group": group}
             outputs.append(record)
             groups[object_hash(group)].append((number, payload))
@@ -419,9 +419,9 @@ def analyze(bundle_path, output, *, source_root=None, version="post", geometry=T
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--bundle", required=True, help="vectors-only ZIP or its extracted directory")
+    parser.add_argument("--archive", "--bundle", dest="bundle", required=True, help="exported vector archive or extracted directory")
     parser.add_argument("--output", required=True, help="new, nonexisting output directory")
-    parser.add_argument("--source-root", default=None, help="frozen baseline source root; defaults to this repository's baseline/")
+    parser.add_argument("--source-root", default=None, help="project source root; defaults to this repository")
     parser.add_argument("--version", choices=("post", "raw", "initial"), default="post")
     parser.add_argument("--skip-geometry", action="store_true", help="inspect and audit with PyTorch only")
     parser.add_argument("--save-decomposition", action="store_true", help="also save shared/residual plain tensor dictionaries")

@@ -182,6 +182,15 @@ def import_bundle(bundle, destination, model, device, semantic_model=None):
     config = deepcopy(original_config)
     config["model"]["path"] = str(model)
     config["platform"]["device"] = device
+    # The restored run uses the explicitly requested target device. Original
+    # multi-device placement is evidence, not a claim about available hardware.
+    if config.get("acceleration", {}).get("enabled"):
+        config["acceleration"]["evaluation_devices"] = [device]
+        if not device.startswith("npu:"):
+            config["acceleration"]["parallel_training"] = False
+            config["acceleration"]["parallel_sequential_orders"] = False
+        if device == "cpu":
+            config["acceleration"]["enabled"] = False
     config["platform"]["persistent_root"] = str(destination)
     if "assets_root" in config["platform"]:
         config["platform"]["assets_root"] = str(bundle / "assets")

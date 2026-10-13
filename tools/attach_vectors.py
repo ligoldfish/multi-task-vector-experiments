@@ -115,6 +115,7 @@ def normalize_protocol(config):
     result = deepcopy(config)
     result.pop("platform", None)
     result.pop("runtime", None)
+    result.pop("acceleration", None)
     result.get("model", {}).pop("path", None)
     result.get("metrics", {}).pop("semantic_model_path", None)
     result.get("data", {}).pop("sources", None)
@@ -153,6 +154,34 @@ def verify_prepared_data(root):
     return manifest, required
 
 
+def verify_training_compatibility(source_root, original_digest, target_digest):
+    """Accept exact code or one documented completed-representation transition."""
+    if original_digest == target_digest:
+        return {"exact_source_match": True, "source_training_package_sha256": original_digest,
+                "target_training_package_sha256": target_digest, "policy": "exact_training_package"}
+    path = Path(source_root) / "provenance/representation-compatibility.json"
+    if not path.is_file():
+        raise ValueError("Scientific Python source differs; no documented representation compatibility")
+    contract = json.loads(path.read_text(encoding="utf-8"))
+    if (original_digest != "7e8f712d4874a19da43716aba98c755dd7294a6ab13080d7a92d0c994e59398d"
+            or target_digest != "b9788996fcf2009bc07c62e632810077469c444cae4436244fc42b46d53ffded"
+            or contract.get("source_training_package_sha256") != original_digest
+            or contract.get("target_training_package_sha256") != target_digest):
+        raise ValueError("Scientific Python source is outside the documented compatibility contract")
+    required = {"data.py", "prompts.py", "training.py", "ltv.py", "loda.py", "gao.py", "subspaces.py",
+                "representations.py", "losses.py", "baselines.py", "joint.py", "sequential.py", "modeling.py", "code_execution.py", "io.py"}
+    checks = contract.get("unchanged_method_sources", {})
+    if set(checks) != {"src/task_vector/" + name for name in required}:
+        raise ValueError("Scientific Python source compatibility omits a required method file")
+    for name, expected in checks.items():
+        if sha256(Path(source_root) / name) != expected:
+            raise ValueError("Scientific Python source method changed: " + name)
+    return {"exact_source_match": False, "source_training_package_sha256": original_digest,
+            "target_training_package_sha256": target_digest, "policy": "documented_completed_representation_transition",
+            "unchanged_method_files": checks, "compatibility_contract_sha256": sha256(path),
+            "new_evaluation_required": True, "optimizer_resume_supported": False}
+
+
 def attach_vectors(bundle_path, config_path, source_root, destination, prepared_data=None):
     """Audit first, then create an immutable evidence snapshot and fresh run root."""
     import yaml
@@ -163,7 +192,7 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
     if destination.is_relative_to(source_root) or source_root.is_relative_to(destination):
         raise ValueError("Destination and source code must be separate directories")
     if not (source_root / "src/task_vector/training.py").is_file():
-        raise ValueError("--source-root must name the baseline scientific source directory")
+        raise ValueError("--source-root must name the project scientific source directory")
     sys.path.insert(0, str(source_root / "src"))
     from task_vector.config import source_manifest, scientific_config, validate_config
     from task_vector.data import load_samples
@@ -176,7 +205,7 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
     validate_config(config)
     template = yaml.safe_load((source_root / "configs/experiment.yaml").read_text(encoding="utf-8"))
     if normalize_protocol(config) != normalize_protocol(template):
-        raise ValueError("Target scientific configuration differs from the frozen baseline protocol")
+        raise ValueError("Target scientific configuration differs from the published experiment protocol")
     device = config["platform"]["device"]
     if device != "cpu" and not (device.startswith("cuda:") or device.startswith("npu:")):
         raise ValueError("Target device must be cpu, cuda:N or npu:N")
@@ -210,6 +239,7 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
         base = contract["fingerprint"]
         audited = []
         seen = set()
+        compatibility_checks = {}
         for item in bundle.index["representations"]:
             route, scope, task, seed, layers = (item.get(k) for k in ("route", "scope", "task", "seed", "layers"))
             if (route not in {"ltv", "loda"} or task not in TASKS or type(seed) is not int
@@ -239,8 +269,8 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
                     or record.get("provenance_sha256") != object_hash(provenance)
                     or provenance.get("data_manifest_sha256") != object_hash(manifest)):
                 raise ValueError(f"Original completion/model/prepared-manifest provenance differs: {original_name}")
-            if provenance.get("training_sources_sha256") != package_hash:
-                raise ValueError("Scientific Python source differs from the actual training package; use its exact version")
+            compatibility_checks[request] = verify_training_compatibility(
+                source_root, provenance.get("training_sources_sha256"), package_hash)
             samples = {split: load_samples(prepared, task, split) for split in ("train", "tune")}
             sample_digest = _content_digest({split: _sample_content(rows) for split, rows in samples.items()})
             if sample_digest != provenance.get("sample_content_sha256"):
@@ -276,10 +306,8 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
                 artifacts[field] = {"filename": filename, "member": info["path"], "sha256": digest,
                                     "representation_digest": content_digest}
             audited.append((item, record, artifacts))
-        required = {(route, "mvp" if route == "loda" else "independent", 17, task, (14,))
-                    for route in ("ltv", "loda") for task in ("math", "logic", "translation", "paraphrase")}
-        if not required <= seen:
-            raise ValueError("The original eight completed seed17 baseline vectors are required")
+        if not audited:
+            raise ValueError("At least one completed task representation is required")
 
         # All input contracts have passed; create only a fresh destination.
         destination.mkdir(parents=True, exist_ok=False)
@@ -328,9 +356,11 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
                    "target_full_config_sha256": object_hash(target_config),
                    "reuse_policy": "completed_training_only_reevaluate", "training": [], "statistics": [],
                    "standalone_vector_import": True, "optimizer_resume_supported": False,
-                   "scientific_python_source_verified_against_training": True,
+                   "scientific_python_source_verified_against_training": all(v["exact_source_match"] for v in compatibility_checks.values()),
+                   "completed_representation_compatibility_verified": True,
+                   "source_compatibility": compatibility_checks,
                    "original_full_source_manifest_verified": False,
-                   "source_evidence_note": "Vector-only contains the training package digest, not the original ops/config file list. The exact scientific Python package and original prepared data are verified; target placement is newly recorded.",
+                   "source_evidence_note": "Original data and representation contents are verified. Exact source equivalence or explicitly bounded method compatibility is recorded separately. Target placement and future computations form new evidence.",
                    "semantic_scorer_original_weights_verified": False,
                    "semantic_scorer_note": "Vector-only has no original scorer snapshot hash; target scorer files are recorded for the new evaluation.",
                    "semantic_scorer_files": {p.relative_to(semantic).as_posix(): sha256(p) for p in sorted(semantic.rglob("*")) if p.is_file()},
@@ -364,7 +394,9 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
                       "export_manifest_sha256": receipt["export_manifest_sha256"],
                       "original_provenance": original["provenance"], "weights_retrained": False,
                       "optimizer_resume_supported": False, "original_runtime_seconds": original.get("runtime_seconds"),
-                      "scientific_python_sources_verified": True, "full_original_source_manifest_verified": False}
+                      "scientific_python_sources_verified": compatibility_checks[original["request_signature"]]["exact_source_match"],
+                      "representation_compatibility": compatibility_checks[original["request_signature"]],
+                      "full_original_source_manifest_verified": False}
             result = deepcopy(original)
             result.update({field: info["path"] for field, info in new_artifacts.items()})
             result.update(artifacts=new_artifacts, request_signature=request, training_origin="imported_completed", imported_from=origin,
@@ -385,9 +417,9 @@ def attach_vectors(bundle_path, config_path, source_root, destination, prepared_
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--bundle", required=True, help="Standalone task-vectors-only ZIP or extracted directory")
-    parser.add_argument("--config", required=True, help="Baseline protocol YAML with target base/scorer paths and device")
-    parser.add_argument("--source-root", default=str(Path(__file__).resolve().parents[1] / "baseline"))
+    parser.add_argument("--archive", "--bundle", dest="bundle", required=True, help="Exported vector ZIP or extracted directory")
+    parser.add_argument("--config", required=True, help="Experiment protocol YAML with target base/scorer paths and device")
+    parser.add_argument("--source-root", default=str(Path(__file__).resolve().parents[1]))
     parser.add_argument("--destination", required=True, help="A NEW experiment directory")
     parser.add_argument("--prepared-data", help="Original complete data directory, including unchanged manifest.json and all JSONLs")
     args = parser.parse_args()

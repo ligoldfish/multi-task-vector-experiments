@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-13",
+  "implementation": "single published implementation",
+  "experiment_tests": {
+    "tests": 389,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "experiment_passed": 388,
+  "artifact_and_intervention_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "validation_scope": "CPU synthetic/reference tests. No NPU/CUDA throughput or scientific outcome claimed.",
+  "source_training_package_sha256": "b9788996fcf2009bc07c62e632810077469c444cae4436244fc42b46d53ffded",
+  "scientific_python_files_changed": false,
+  "configuration_change": "Engineering parallel execution defaults are now explicit in the public template; scientific values retained.",
+  "skip_reasons": [
+    "set TV_TEST_NPU=1 for real NPU"
+  ],
+  "local_test_runtime_note": "The Windows test process used an isolated dependency directory and a process-local duplicate OpenMP workaround; neither is a production requirement."
+}

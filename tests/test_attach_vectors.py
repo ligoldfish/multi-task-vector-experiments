@@ -15,7 +15,7 @@ import yaml
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools"))
 sys.path.insert(0, str(REPO / "portable"))
-sys.path.insert(0, str(REPO / "baseline/src"))
+sys.path.insert(0, str(REPO / "src"))
 import attach_vectors as attach
 import portable_run
 from task_vector.config import source_manifest
@@ -41,10 +41,10 @@ class AttachIntegration(unittest.TestCase):
     def setUpClass(cls):
         cls.work = Path(tempfile.mkdtemp(prefix="task-vector-attach-tests-"))
         cls.source, cls.data, cls.model, cls.scorer, cls.bundle = (cls.work / n for n in ("baseline", "data", "model", "scorer", "vectors"))
-        for name in ("src", "configs", "docs"):
-            shutil.copytree(REPO / "baseline" / name, cls.source / name,
+        for name in ("src", "configs", "docs", "provenance"):
+            shutil.copytree(REPO / name, cls.source / name,
                             ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-        shutil.copyfile(REPO / "baseline/pyproject.toml", cls.source / "pyproject.toml")
+        shutil.copyfile(REPO / "pyproject.toml", cls.source / "pyproject.toml")
         cls.model.mkdir()
         cls.scorer.mkdir()
         dump(cls.model / "config.json", {"fixture": "SYNTHETIC_NOT_MODEL_WEIGHTS"})
@@ -52,6 +52,7 @@ class AttachIntegration(unittest.TestCase):
         dump(cls.scorer / "config.json", {"fixture": "SYNTHETIC_NOT_SCORER"})
         cls.config = yaml.safe_load((cls.source / "configs/experiment.yaml").read_text(encoding="utf-8"))
         cls.config["platform"].update(device="cpu", persistent_root=str(cls.work / "old-runtime"))
+        cls.config["acceleration"]["enabled"] = False
         cls.config["model"]["path"] = str(cls.model)
         cls.config["metrics"]["semantic_model_path"] = str(cls.scorer)
         cls.config_path = cls.work / "target-config.yaml"
@@ -150,6 +151,41 @@ class AttachIntegration(unittest.TestCase):
         shutil.copytree(self.data, relocated)
         receipt = attach.attach_vectors(archive, self.config_path, self.source, self.destination("zip"), relocated)
         self.assertEqual(len(receipt["training"]), 8)
+
+    def test_one_completed_representation_can_be_attached(self):
+        archive = self.work / "one-vector"
+        shutil.copytree(self.bundle, archive)
+        index = deepcopy(self.index)
+        index["representations"] = index["representations"][:1]
+        dump(archive / "VECTOR_INDEX.json", index)
+        seal(archive)
+        receipt = attach.attach_vectors(archive, self.config_path, self.source,
+                                        self.destination("one-vector"), self.data)
+        self.assertEqual(len(receipt["training"]), 1)
+
+    def test_documented_source_transition_preserves_origin_and_skips_training(self):
+        archive = self.work / "compatible-revision"
+        shutil.copytree(self.bundle, archive)
+        legacy = "7e8f712d4874a19da43716aba98c755dd7294a6ab13080d7a92d0c994e59398d"
+        for item in self.index["representations"]:
+            origin = archive / item["training_origin"]
+            record = json.loads(origin.read_text(encoding="utf-8"))
+            record["provenance"]["training_sources_sha256"] = legacy
+            record["provenance_sha256"] = attach.object_hash(record["provenance"])
+            dump(origin, record)
+        seal(archive)
+        destination = self.destination("compatible-revision")
+        receipt = attach.attach_vectors(archive, self.config_path, self.source, destination, self.data)
+        self.assertFalse(receipt["scientific_python_source_verified_against_training"])
+        self.assertTrue(receipt["completed_representation_compatibility_verified"])
+        config, loaded, code = portable_run.load_portable_context(destination)
+        runner = portable_run.portable_runner(config, loaded, code)
+        runner.load_model = lambda: self.fail("Completed compatible representations must not retrain")
+        for route in ("ltv", "loda"):
+            for task in ("math", "logic", "translation", "paraphrase"):
+                result = runner.train("mvp", route, 17, task)
+                self.assertEqual(result["imported_from"]["original_provenance"]["training_sources_sha256"], legacy)
+                self.assertFalse(result["imported_from"]["scientific_python_sources_verified"])
 
     def test_regenerated_manifest_cannot_claim_original_split_identity(self):
         changed = self.work / "regenerated-data"
@@ -251,7 +287,7 @@ class AttachIntegration(unittest.TestCase):
         downloads = self.work / "actual-exporter-downloads"
         downloads.mkdir()
         export.main(["--code", str(code), "--experiment", str(root), "--config", str(config_path), "--output", str(downloads)])
-        vector_zip = next(downloads.glob("task-vectors-only-*.zip"))
+        vector_zip = next(downloads.glob("vectors-*.zip"))
         destination = self.destination("actual-export-attached")
         receipt = attach.attach_vectors(vector_zip, self.config_path, self.source, destination, root / "data")
         target_config, receipt, target_code = portable_run.load_portable_context(destination)

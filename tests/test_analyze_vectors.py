@@ -48,7 +48,7 @@ class BundleFixture:
         provenance = {"base_fingerprint": self.base, "request_signature": signature,
                       "sample_content_sha256": "2" * 64, "encoded_samples_sha256": "3" * 64,
                       "source_manifest_sha256": "4" * 64}
-        package = ROOT / "baseline/src/task_vector"
+        package = ROOT / "src/task_vector"
         if package.is_dir():
             provenance["training_sources_sha256"] = audit.object_hash({
                 p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(package.glob("*.py"))})
@@ -254,7 +254,7 @@ class VectorAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exactly the bundle"):
             audit.analyze(bundle, self.root / "out", geometry=False)
 
-    @unittest.skipUnless((ROOT / "baseline/src/task_vector/analysis.py").is_file(), "Frozen baseline not yet staged")
+    @unittest.skipUnless((ROOT / "src/task_vector/analysis.py").is_file(), "Project source is unavailable")
     def test_geometry_stays_within_route_scope_and_layer_and_uses_actual_BA(self):
         fixture = BundleFixture()
         fixture.add("math", "ltv")
@@ -264,7 +264,7 @@ class VectorAuditTests(unittest.TestCase):
         fixture.add("logic", "loda", scale=4.)
         fixture.add("math", "loda", scope="loo-translation", zero=True)
         bundle = fixture.materialize(self.root / "bundle.zip")
-        representation, _ = audit.geometry_functions(ROOT / "baseline")
+        representation, _ = audit.geometry_functions(ROOT)
         with patch.object(representation.LowRankFactor, "dense", side_effect=AssertionError("Dense expansion is forbidden")):
             result = audit.analyze(bundle, self.root / "out", save_decomposition=True)
         self.assertEqual(len(result["geometry"]), 4)

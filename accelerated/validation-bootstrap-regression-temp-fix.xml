@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1.053" timestamp="2026-10-13T03:31:30.012965+08:00" hostname="goldfish"><testcase classname="tests.test_metrics" name="test_semantic_fingerprint_tracks_content_and_not_absolute_placement" time="0.433" /></testsuite></testsuites>

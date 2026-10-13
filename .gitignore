@@ -1,4 +1,3 @@
-# User runtime assets stay outside Git; source and validation reports stay in Git.
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -24,7 +23,6 @@ paths.local.json
 *.zip
 *.tar
 *.tar.gz
-*.crdownload
 *.log
 /artifacts/
 /downloads/
@@ -33,8 +31,6 @@ paths.local.json
 /experiments/
 /runs/
 /outputs/
+/data/
 /dist/
 /build/
-/portable/portable-handoff-test-*/
-
-# Historical reports are intentionally retained, including XML and JSON.

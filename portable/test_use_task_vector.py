@@ -11,7 +11,7 @@ import torch
 from torch import nn
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "baseline" / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from use_task_vector import load_plain, task_vector_context, verify_base_directory
 from task_vector.ltv import intervention_context
 from task_vector.representations import LowRankFactor, Representation

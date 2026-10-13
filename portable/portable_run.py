@@ -143,7 +143,7 @@ def main():
         print(json.dumps({"command": args.command, "result": display}, ensure_ascii=False, indent=2, default=str))
         return 42 if isinstance(result, dict) and any(result.get(key) is False for key in ("completed", "passed", "passes")) else 0
     finally:
-        runner.release_model()
+        getattr(runner, "close", runner.release_model)()
 
 
 if __name__ == "__main__":
